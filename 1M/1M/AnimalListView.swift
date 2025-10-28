@@ -1,0 +1,218 @@
+//
+//  AnimalListView.swift
+//  1M
+//
+//  Lista de animais com navegação para detalhes
+//
+
+import Foundation
+import SwiftUI
+import CoreData
+
+struct AnimalListView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @ObservedObject private var filterManager = FilterManager.shared  // Acesso direto ao singleton
+    
+    @FetchRequest(
+        entity: Animal.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Animal.name, ascending: true)]
+    ) private var allAnimals: FetchedResults<Animal>
+    
+    // animais filtrados
+    private var filteredAnimals: [Animal] {
+        var animals = Array(allAnimals)
+        
+        if !filterManager.selectedSpecies.isEmpty {
+            animals = animals.filter { filterManager.selectedSpecies.contains($0.species) }
+        }
+        
+        if !filterManager.selectedBreeds.isEmpty {
+            animals = animals.filter { filterManager.selectedBreeds.contains($0.breed) }
+        }
+        
+        if !filterManager.selectedGenders.isEmpty {
+            animals = animals.filter { filterManager.selectedGenders.contains($0.gender) }
+        }
+        
+        if !filterManager.selectedAges.isEmpty {
+            animals = animals.filter { filterManager.selectedAges.contains($0.age) }
+        }
+        
+        if filterManager.showOnlyFavorites {
+            animals = animals.filter { $0.isFollowing }
+        }
+        
+        return animals
+    }
+    
+    var body: some View {
+        Group {
+            if allAnimals.isEmpty {
+                emptyStateView
+            } else if filteredAnimals.isEmpty {
+                noResultsView
+            } else {
+                animalList
+            }
+        }
+        .navigationTitle("Explorar")
+        .navigationDestination(for: Animal.self) { animal in
+            AnimalDetailView(animal: animal)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                filterButton
+            }
+            ToolbarItem(placement: .navigationBarLeading) {
+                Menu {
+                    Button(action: loadMockData) {
+                        Label("Carregar Dados Mock", systemImage: "arrow.down.doc")
+                    }
+                    
+                    Button(role: .destructive, action: clearAllData) {
+                        Label("Limpar Todos os Dados", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
+        .onAppear {
+            // Carregar dados mock automaticamente se não houver animais
+            if allAnimals.isEmpty {
+                loadMockData()
+            }
+        }
+    }
+    
+    // botao de filtro
+    private var filterButton: some View {
+        NavigationLink {
+            FilterView()
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: filterManager.hasActiveFilters ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                
+                if filterManager.activeFilterCount > 0 {
+                    Text("\(filterManager.activeFilterCount)")
+                        
+                }
+            }
+        }
+    }
+    
+    // lista de Animais
+    private var animalList: some View {
+        VStack(spacing: 0) {
+            if filterManager.hasActiveFilters {
+                filterBanner
+            }
+            
+            List {
+                ForEach(filteredAnimals, id: \.id) { animal in
+                    NavigationLink(value: animal) {
+                        AnimalRowView(animal: animal)
+                    }
+                }
+            }
+        }
+    }
+    
+    //banner de Filtros Ativos
+    private var filterBanner: some View {
+        HStack {
+            Image(systemName: "line.3.horizontal.decrease.circle.fill")
+        
+            
+            Text("\(filteredAnimals.count) de \(allAnimals.count) animais")
+     
+            
+            Spacer()
+            
+            Button("Limpar") {
+                filterManager.clearAll()
+            }
+    
+        }
+
+    }
+    
+    // sem Resultados
+    private var noResultsView: some View {
+        VStack(spacing: 20) {
+        
+      
+            
+            Text("Nenhum animal encontrado")
+        
+            
+       }
+       
+    }
+    
+    // sem animal
+    private var emptyStateView: some View {
+        VStack {
+         
+            
+            Text("Nenhum animal encontrado")
+          
+
+         
+        }
+       
+    }
+    
+    // funcoes buscar dados
+    private func loadMockData() {
+        MockData.populateCoreData(context: viewContext)
+    }
+    
+    private func clearAllData() {
+        MockData.clearCoreData(context: viewContext)
+    }
+}
+
+// View da Linha do Animal
+struct AnimalRowView: View {
+    let animal: Animal
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            ZStack {
+     
+                
+    
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(animal.name)
+                  
+                
+                Text("\(animal.species) • \(animal.breed)")
+                 
+                
+                HStack(spacing: 8) {
+                    Label(animal.age, systemImage: "calendar")
+                    Label(animal.location, systemImage: "location.fill")
+                }
+        
+            }
+            
+            Spacer()
+            
+            if animal.isFollowing {
+                Image(systemName: "heart.fill")
+                    
+            }
+        }
+       
+    }
+}
+
+#Preview {
+    NavigationStack {
+        AnimalListView()
+            .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    }
+}
