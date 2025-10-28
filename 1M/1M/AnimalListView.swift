@@ -13,6 +13,16 @@ struct AnimalListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @ObservedObject private var filterManager = FilterManager.shared  // Acesso direto ao singleton
     
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }	
+
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: isIPad ? 3 : 2)
+    }
+    
     @FetchRequest(
         entity: Animal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Animal.name, ascending: true)]
@@ -108,10 +118,26 @@ struct AnimalListView: View {
                 filterBanner
             }
             
-            List {
-                ForEach(filteredAnimals, id: \.id) { animal in
-                    NavigationLink(value: animal) {
-                        AnimalRowView(animal: animal)
+            if isIPad {
+                // Grid para iPad
+                ScrollView {
+                    LazyVGrid(columns: gridColumns, spacing: 16) {
+                        ForEach(filteredAnimals, id: \.id) { animal in
+                            NavigationLink(value: animal) {
+                                AnimalCardView(animal: animal)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                }
+            } else {
+                // List para iPhone
+                List {
+                    ForEach(filteredAnimals, id: \.id) { animal in
+                        NavigationLink(value: animal) {
+                            AnimalRowView(animal: animal)
+                        }
                     }
                 }
             }
@@ -210,6 +236,48 @@ struct AnimalRowView: View {
     }
 }
 
+struct AnimalCardView: View {
+    let animal: Animal
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ZStack {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.2))
+                    .aspectRatio(1, contentMode: .fit)
+                
+                Image(systemName: "pawprint.fill")
+                    .font(.system(size: 40))
+                    .foregroundColor(.gray)
+            }
+            .cornerRadius(12)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(animal.name)
+                        .font(.headline)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if animal.isFollowing {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+                
+                Text("\(animal.species)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Text(animal.location)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 4)
+        }
+    }
+}
 #Preview {
     NavigationStack {
         AnimalListView()

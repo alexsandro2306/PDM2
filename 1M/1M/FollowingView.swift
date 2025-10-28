@@ -11,6 +11,12 @@ import CoreData
 struct FollowingView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isIPad: Bool {
+        horizontalSizeClass == .regular
+    }
+    
     @FetchRequest(
         entity: Animal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Animal.name, ascending: true)],
@@ -31,27 +37,46 @@ struct FollowingView: View {
     // lista de animais
     private var animalsList: some View {
         VStack(spacing: 0) {
-            // Header com contador
             headerView
             
-            List {
-                ForEach(followedAnimals, id: \.id) { animal in
-                    NavigationLink(destination: AnimalDetailView(animal: animal)) {
-                        FollowingAnimalRow(animal: animal)
+            if isIPad {
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 250))], spacing: 16) {
+                        ForEach(followedAnimals, id: \.id) { animal in
+                            NavigationLink(destination: AnimalDetailView(animal: animal)) {
+                                AnimalCardView(animal: animal)
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    unfollowAnimal(animal)
+                                } label: {
+                                    Label("Deixar de Seguir", systemImage: "heart.slash")
+                                }
+                            }
+                        }
                     }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            unfollowAnimal(animal)
-                        } label: {
-                            Label("Deixar de Seguir", systemImage: "heart.slash.fill")
+                    .padding()
+                }
+            } else {
+                List {
+                    ForEach(followedAnimals, id: \.id) { animal in
+                        NavigationLink(destination: AnimalDetailView(animal: animal)) {
+                            FollowingAnimalRow(animal: animal)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                unfollowAnimal(animal)
+                            } label: {
+                                Label("Deixar de Seguir", systemImage: "heart.slash.fill")
+                            }
                         }
                     }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
         }
     }
-    
     // header
     private var headerView: some View {
         HStack {
