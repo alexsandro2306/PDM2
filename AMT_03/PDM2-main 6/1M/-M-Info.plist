@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>INIntentsSupported</key>
+    <array>
+        <string>Intent</string>
+    </array>
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIImageName</key>
+        <string>Image1</string>
+        <key>UILaunchScreen</key>
+        <dict/>
+    </dict>
+    <key>NSLocationWhenInUseUsageDescription</key>
+        <string>Precisamos da tua localização para mostrar animais próximos de ti no mapa.</string>
+        
+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>Permite acesso à localização para receber notificações sobre animais perto de ti.</string>
+        
+</dict>
+</plist>

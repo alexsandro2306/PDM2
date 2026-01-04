@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22522" systemVersion="22H722" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Animal" representedClassName="Animal" syncable="YES">
+        <attribute name="addr_city" optional="YES" attributeType="String"/>
+        <attribute name="age" optional="YES" attributeType="String"/>
+        <attribute name="attribute" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="color" optional="YES" attributeType="String"/>
+        <attribute name="imagemURL" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
+        <attribute name="isFollowing" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="last_modified" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="pet_id" optional="YES" attributeType="String"/>
+        <attribute name="pet_name" optional="YES" attributeType="String"/>
+        <attribute name="primary_breed" attributeType="String"/>
+        <attribute name="secondary_breed" optional="YES" attributeType="String"/>
+        <attribute name="sex" attributeType="String"/>
+        <attribute name="size" optional="YES" attributeType="String"/>
+        <attribute name="species" optional="YES" attributeType="String"/>
+        <relationship name="photo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Photo" inverseName="animal" inverseEntity="Photo"/>
+        <userInfo>
+            <entry key="key" value="value"/>
+        </userInfo>
+    </entity>
+    <entity name="Photo" representedClassName="Photo" syncable="YES" codeGenerationType="class">
+        <attribute name="medium" attributeType="String"/>
+        <attribute name="size" optional="YES" attributeType="String"/>
+        <attribute name="small" optional="YES" attributeType="String"/>
+        <attribute name="url" optional="YES" attributeType="String"/>
+        <relationship name="animal" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Animal" inverseName="photo" inverseEntity="Animal"/>
+    </entity>
+</model>
